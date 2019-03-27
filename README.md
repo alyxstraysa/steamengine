@@ -11,3 +11,6 @@ Each edge is a dictionary with a 'source' and 'target' key
 List of Steam game ids in the order corresponding to the above graph
 For example, index 0 of the array is '10', meaning that node 0 of the above graph corresponds to the game with Steam id 10 (Counter-Strike)
 Use https://steamdb.info/app/<game_id>/graphs/, or the Item metadata file from https://cseweb.ucsd.edu/~jmcauley/datasets.html#steam_data to search for which game an id represents
+
+## steamgamescraper.py
+If you run the whole thing, it will scrape the tags (e.g. Fantasy, RPG, Shooter, etc.) for each Steam Game along with the game description
