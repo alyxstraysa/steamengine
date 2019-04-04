@@ -19,9 +19,12 @@ git clone https://github.com/alyxstraysa/steamengine.git
 ```
 
 ### Running
-To start the application, run the following command from the root of the project directory
+To start the application, run the following command from the root of the project directory.
+If you are running python3, use the second command.
+
 ```
 python src/server/manage.py runserver
+python3 src/server/manage.py runserver
 ```
 to start the server, and navigate to [http://127.0.0.1:8000/](http://127.0.0.1:8000/) with a web browser.
 
