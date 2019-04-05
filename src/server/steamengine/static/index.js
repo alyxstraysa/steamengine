@@ -1,5 +1,3 @@
-console.log("Hello world");
-getGameBySteamID(0, res => { console.log(res); });
 
 /**
  * Retrieves game information from the databse by Steam id
