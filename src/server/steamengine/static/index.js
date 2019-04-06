@@ -1,3 +1,14 @@
+var width = 500;
+var height = 500;
+svg = d3.select("#svg-div").append("svg")
+        .attr("width", width).attr("height", height);
+svg.append("line")
+   .attr("x1", 100)
+   .attr("y1", 100)
+   .attr("x2", 200) 
+   .attr("y2", 200)
+   .style("stroke", "rgb(255,0,0)")
+   .style("stroke-width", 2);
 
 /**
  * Retrieves game information from the databse by Steam id
