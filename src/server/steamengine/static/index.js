@@ -5,10 +5,13 @@ svg = d3.select("#svg-div").append("svg")
 svg.append("line")
    .attr("x1", 100)
    .attr("y1", 100)
-   .attr("x2", 200) 
+   .attr("x2", 200)
    .attr("y2", 200)
    .style("stroke", "rgb(255,0,0)")
    .style("stroke-width", 2);
+
+getGameBySteamID(10, res => console.log(res));
+getGameByName("Counter-Strike", res => console.log(res));
 
 /**
  * Retrieves game information from the databse by Steam id
@@ -16,20 +19,41 @@ svg.append("line")
  * @param callback the function to call with the response results
  */
 function getGameBySteamID(steam_id, callback) {
-  var xhttp = new XMLHttpRequest();
   var url = "http://127.0.0.1:8000/query";
-  var params;
-  params = queryString({
+  var params = queryString({
     "query-type": "get-game-by-steam-id",
     "steam-id": steam_id
   });
-  url = url + params;
+  getCallback(url + params, res => callback(res.game))
+}
+
+/**
+ * Retrieves game information from the databse by game name
+ * @param name name of the entry to retrieve
+ * @param callback the function to call with the response results
+ */
+function getGameByName(name, callback) {
+  var url = "http://127.0.0.1:8000/query";
+  var params = queryString({
+    "query-type": "get-game-by-name",
+    "name": name
+  });
+  getCallback(url + params, res => callback(res.game))
+}
+
+/**
+ * Sends GET query and calls a callback function on response
+ * @param url query url
+ * @param callback the function to call with the response results
+ */
+function getCallback(url, callback) {
+  var xhttp = new XMLHttpRequest();
   xhttp.onreadystatechange = processRequest;
 
   function processRequest() {
     if (xhttp.readyState === 4 && xhttp.status === 200) {
       var response = JSON.parse(xhttp.response);
-      callback(response.game);
+      callback(response);
     }
   }
   xhttp.open("GET", url, true);
