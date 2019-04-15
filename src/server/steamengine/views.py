@@ -32,10 +32,7 @@ def get_game_by_id(request: HttpRequest) -> HttpResponse:
     steam_id = request.GET.get('steam-id', None)
     if steam_id is None:
         return JsonResponse({'game': None})
-    if steam_id == '0':
-        game = Game(id=0, name="Test Game", steam_id=0, price=0.00)
-    else:
-        game = Game.objects.filter(steam_id=steam_id).first()
+    game = Game.objects.filter(steam_id=steam_id).first()
     if game is None:
         return JsonResponse({'game': None})
     return JsonResponse({'game': model_to_dict(game)})
