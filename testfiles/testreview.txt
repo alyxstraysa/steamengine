@@ -1,0 +1,11 @@
+0.9760000000	voice acting
+0.4810000000	the same
+0.3300000000	this game
+0.2910000000	the voice acting
+0.2130000000	the game
+0.2060000000	the hotel
+0.2050000000	the voice
+0.2050000000	the end
+0.1990000000	the story
+0.1840000000	this one
+0.1730000000	the player

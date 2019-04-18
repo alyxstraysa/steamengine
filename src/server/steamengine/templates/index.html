@@ -1,12 +1,114 @@
-<!DOCTYPE html> {% load static %}
-<meta charset="utf-8">
-
+<!-- <!DOCTYPE html> {% load static %}
 <head>
   <link rel="stylesheet" href="{% static "index.css" %}">
+  <script src="{% static "d3.min.js" %}"></script>
 </head>
 
 <body>
   <h1 style="margin:10px">Steam Engine - Automated Steam Game Recommendations</h1>
-
+  <div id="svg-div"></<div>
   <script src="{% static "index.js" %}"></script>
+</body> -->
+
+<!DOCTYPE html> {% load static %}
+<meta charset="utf-8">
+<html lang="en-us">
+<head>
+<meta http-equiv="X-UA-Compatible" content="IE=edge">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Locomotive Steam Engine</title>
+<link href="{% static "singlePageTemplate.css" %}" rel="stylesheet" type="text/css">
+<link href="{% static "jquery.ui.core.min.css" %}" rel="stylesheet" type="text/css">
+<link href="{% static "jquery.ui.theme.min.css" %}" rel="stylesheet" type="text/css">
+<link href="{% static "jquery.ui.autocomplete.min.css" %}" rel="stylesheet" type="text/css">
+<link href="{% static "jquery.ui.menu.min.css" %}" rel="stylesheet" type="text/css">
+<!--The following script tag downloads a font from the Adobe Edge Web Fonts server for use within the web page. We recommend that you do not modify it.-->
+<script src="{% static "jquery-1.11.1.min.js" %}"></script>
+<script src="{% static "jquery.ui-1.10.4.autocomplete.min.js" %}"></script>
+<script>var __adobewebfontsappname__="dreamweaver"</script>
+<script src="{% static "edgefonts.js" %}" type="text/javascript"></script>
+<script src="{% static "d3.v5.min.js" %}" type ="text/javascript" > </script>
+<script src="{% static "index.js" %}" type="text/javascript"> </script>
+
+<!-- HTML5 shim and Respond.js for IE8 support of HTML5 elements and media queries -->
+<!-- WARNING: Respond.js doesn't work if you view the page via file:// -->
+<!--[if lt IE 9]>
+      <script src="https://oss.maxcdn.com/html5shiv/3.7.2/html5shiv.min.js"></script>
+      <script src="https://oss.maxcdn.com/respond/1.4.2/respond.min.js"></script>
+    <![endif]-->
+</head>
+<body>
+
+
+<!-- MAIN Container -->
+<div class="container">
+  <!-- LOCOMOTIVE HEADER Section -->
+  <section class="hero" id="hero">
+    <h2 class="hero_header">LOCOMOTIVE <span class="light">STEAM ENGINE</span></h2>
+    <p class="tagline">GAME RECOMMENDATIONS THROUGH ANALYTICS</p>
+  </section>
+
+  <!-- About Section -->
+  <section class="about" id="about">
+    <h2 class="hidden">About</h2>
+    <blockquote>
+      <p class="text_column"> Team Members: Roland Samuelson, Victor Ng, Jamie Joseph, Darcy Johnston, Eric O'Connor, Ian Murray </p>
+    </blockquote>
+  </section>
+
+
+
+  <!-- More Info Section -->
+  <section class = "main_picture">
+    <article class="main_column1">
+      <h3>RECOMMENDATIONS</h3>
+	<div id="svg1"></div>
+	 <script type ="text/javascript">
+		var width = 800;
+		var height = 700;
+		var svg = d3.select("#svg1").append('svg')
+			.attr('width', width)
+			.attr('height', height)
+	</script>
+<!--		<div class="button">subscribe</div>-->
+
+    </article>
+    <article class="main_column2">
+      <h3>GAME INFORMATION</h3>
+		<div id="placeholder">
+      <p id="title_id">Title:</p>
+      <p id="price_id">Price:</p>
+      <p id="tag_id">Tags:</p>
+      <p id="review_id">Top Review:</p>
+    </div>
+    </article>
+  </section>
+
+
+<form>
+	<label>
+	SEARCH: <input type="text" id="Autocomplete1">
+	</label>
+	<label>
+	RECOMMENDATIONS: <input type="number" id="recnumber" name="recnumber">
+	<input type = "button" value = "GO" onclick="processFormData();">
+	</label>
+	</form>
+
+
+
+<!-- Footer Section -->
+  <section class="footer_banner" id="contact">
+    <h2 class="hidden">Footer Banner Section </h2>
+    <p class="hero_header">CSE6242 Spring 2019</p>
+  </section>
+
+</div>
+<!-- Main Container Ends -->
+<script type="text/javascript">
+$(function() {
+	$( "#Autocomplete1" ).autocomplete();
+});
+</script>
 </body>
+</html>
