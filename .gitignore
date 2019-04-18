@@ -65,3 +65,6 @@ typings/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
+
+# OSX specific metadata
+.DS_Store

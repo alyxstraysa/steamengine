@@ -15,6 +15,13 @@ def query(request: HttpRequest) -> HttpResponse:
         return get_game_by_id(request)
     elif query_type == 'get-game-by-name':
         return get_game_by_name(request)
+    elif query_type == 'get-recommendations':
+        return get_recommendations(request)
+    elif query_type == 'get-reviews':
+        return get_reviews(request)
+    elif query_type == 'get-tags':
+        return get_tags(request)
+    return JsonResponse({})
 
 def get_game_by_id(request: HttpRequest) -> HttpResponse:
     """
@@ -25,11 +32,7 @@ def get_game_by_id(request: HttpRequest) -> HttpResponse:
     steam_id = request.GET.get('steam-id', None)
     if steam_id is None:
         return JsonResponse({'game': None})
-    print(steam_id)
-    if steam_id == '0':
-        game = Game(id=0, name="Test Game", steam_id=0, price=0.00)
-    else:
-        game = Game.objects.filter(steam_id=steam_id).first()
+    game = Game.objects.filter(steam_id=steam_id).first()
     if game is None:
         return JsonResponse({'game': None})
     return JsonResponse({'game': model_to_dict(game)})
@@ -37,15 +40,13 @@ def get_game_by_id(request: HttpRequest) -> HttpResponse:
 def get_game_by_name(request: HttpRequest) -> HttpResponse:
     """
     Look up game by steam name
+
+    name: Name of game
     """
-    game_name = request.GET.get('game-name', None)
-    if game_name is None:
+    name = request.GET.get('name', None)
+    if name is None:
         return JsonResponse({'game': None})
-    print(game_name)
-    if game_name == 'Test Game':
-        game = Game(id=0, name="Test Game", steam_id=0, price=0.00)
-    else:
-        game = Game.objects.filter(name=game_name).first()
+    game = Game.objects.filter(name=name).first()
     if game is None:
         return JsonResponse({'game': None})
     return JsonResponse({'game': model_to_dict(game)})
@@ -79,11 +80,3 @@ def get_tags(request: HttpRequest) -> HttpResponse:
     num: Number of tags to return
     """
     pass
-
-
-
-def safe_cast(val, typ, default):
-    try:
-        return typ(val)
-    except ValueError:
-        return default
