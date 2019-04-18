@@ -13,6 +13,8 @@ def query(request: HttpRequest) -> HttpResponse:
         return JsonResponse({})
     elif query_type == 'get-game-by-steam-id':
         return get_game_by_id(request)
+    elif query_type == 'get-game-by-name':
+        return get_game_by_name(request)
 
 def get_game_by_id(request: HttpRequest) -> HttpResponse:
     """
@@ -36,7 +38,17 @@ def get_game_by_name(request: HttpRequest) -> HttpResponse:
     """
     Look up game by steam name
     """
-    pass
+    game_name = request.GET.get('game-name', None)
+    if game_name is None:
+        return JsonResponse({'game': None})
+    print(game_name)
+    if game_name == 'Test Game':
+        game = Game(id=0, name="Test Game", steam_id=0, price=0.00)
+    else:
+        game = Game.objects.filter(name=game_name).first()
+    if game is None:
+        return JsonResponse({'game': None})
+    return JsonResponse({'game': model_to_dict(game)})
 
 def get_recommendations(request: HttpRequest) -> HttpResponse:
     """

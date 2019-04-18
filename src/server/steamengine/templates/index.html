@@ -1,6 +1,4 @@
 <!-- <!DOCTYPE html> {% load static %}
-<meta charset="utf-8">
-
 <head>
   <link rel="stylesheet" href="{% static "index.css" %}">
 </head>
@@ -40,7 +38,7 @@
 </head>
 <body>
 
-	
+
 <!-- MAIN Container -->
 <div class="container">
   <!-- LOCOMOTIVE HEADER Section -->
@@ -57,43 +55,47 @@
     </blockquote>
   </section>
 
-	
-	
+
+
   <!-- More Info Section -->
   <section class = "main_picture">
     <article class="main_column1">
       <h3>RECOMMENDATIONS</h3>
-	<div id="svg1"></div>	
-	 <script type ="text/javascript"> 
+	<div id="svg1"></div>
+	 <script type ="text/javascript">
 		var width = 800;
 		var height = 700;
 		var svg = d3.select("#svg1").append('svg')
 			.attr('width', width)
-			.attr('height', height)	
+			.attr('height', height)
 	</script>
 <!--		<div class="button">subscribe</div>-->
-		 
+
     </article>
     <article class="main_column2">
       <h3>GAME INFORMATION</h3>
-		<div id="placeholder"></div>
-		
+		<div id="placeholder">
+      <p id="title_id">Title:</p>
+      <p id="price_id">Price:</p>
+      <p id="tag_id">Tags:</p>
+      <p id="review_id">Top Review:</p>
+    </div>
     </article>
   </section>
 
-	
+
 <form>
 	<label>
 	SEARCH: <input type="text" id="Autocomplete1">
 	</label>
 	<label>
-	RECOMMENDATIONS: <input type="number" name="recnumber">
-	<input type = "submit" value = "GO">
-	</label>	
+	RECOMMENDATIONS: <input type="number" id="recnumber" name="recnumber">
+	<input type = "button" value = "GO" onclick="processFormData();">
+	</label>
 	</form>
 
 
-	
+
 <!-- Footer Section -->
   <section class="footer_banner" id="contact">
     <h2 class="hidden">Footer Banner Section </h2>
@@ -104,7 +106,7 @@
 <!-- Main Container Ends -->
 <script type="text/javascript">
 $(function() {
-	$( "#Autocomplete1" ).autocomplete(); 
+	$( "#Autocomplete1" ).autocomplete();
 });
 </script>
 </body>
