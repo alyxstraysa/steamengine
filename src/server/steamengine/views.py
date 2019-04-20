@@ -8,6 +8,9 @@ from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.views.generic import TemplateView
 from django.conf import settings
 from .models import *
+import os
+import pickle
+from django.conf import settings
 
 
 
@@ -134,7 +137,30 @@ def get_tags(request: HttpRequest) -> HttpResponse:
     game_id: Game Steam id
     num: Number of tags to return
     """
-    pass
+    file = os.path.join(settings.BASE_DIR, 'server', 'steamengine', 'tags', 'dill.pickle')
+
+    steam_id = request.GET.get('steam-id', None)
+
+    num = request.GET.get('max', 3)
+    try:
+        num = int(num)
+    except:
+        num = 3
+
+    if steam_id is None:
+        return JsonResponse({'tags': []})
+
+    with open(file, 'rb') as pickled:
+        steam_tag_dict = pickle.load(pickled)
+
+        if steam_id not in steam_tag_dict:
+            return JsonResponse({'tags': []})
+        else:
+            steam_tag_extracted = steam_tag_dict[steam_id]
+
+            num = min(num, len(steam_tag_extracted))
+
+            return JsonResponse({'tags': steam_tag_dict[steam_id][:num]})
 
 def try_call(f, x):
     try:
