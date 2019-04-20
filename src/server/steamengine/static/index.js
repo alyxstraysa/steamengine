@@ -38,10 +38,11 @@ function getGameByName(name) {
  * Retrieves game recommendations from a list of steam ids
  * @param ids list of steam ids to base recommendations on
  * @param num number of recommendations to return
+ * @param rec recommender system to use
  */
-function getRecommendations(ids, num=10) {
+function getRecommendations(ids, num=10, rec=1) {
   var url = "http://127.0.0.1:8000/query";
-  var attrs = [["query-type", "get-recommendations"], ["max", num]];
+  var attrs = [["query-type", "get-recommendations"], ["max", num], ["rec", rec]];
   if (!Array.isArray(ids)) ids = [ids];
   attrs = attrs.concat(ids.map(id => ["game-id", id]));
   var params = queryString(attrs);
