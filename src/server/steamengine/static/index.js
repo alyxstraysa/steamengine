@@ -77,9 +77,7 @@ function initializeUI(game) {
   var rec_number = rec_number_element.value;
   //getRecommendations(game_list = [game['steam_id']], num = rec_number, res => populateGraph(game['steam_id'], res));
   var ids = [289650,359550,230410,440];
-  var input = game['steam_id']
-
-  Promise.all(ids.map(getGameBySteamID)).then(vals => populateGraph(game, vals));
+  Promise.all(ids.map(getGameBySteamID)).then(rec_list => populateGraph(game, rec_list));
 }
 
 function processGame(game) {
@@ -107,43 +105,6 @@ function printTags(tag_list) {
 function printTopReview(review) {
   document.getElementById("review_id").innerHTML = "Top Review: " + review;
 }
-
-function getGameObjects(game, rec_list, obj_list, length, counter) {
-  console.log(obj_list);
-  console.log(rec_list);
-  if (counter == length) {
-    populateGraph(game, obj_list);
-  } else {
-    console.log(rec_list[counter])
-    getGameBySteamID(rec_list[counter], res => getGameObjects(game, rec_list, obj_list[counter] = res, length, counter + 1));
-  }
-}
-
-
-///////////////////////////////
-/**
-  * Use the form data to access the game info by its name
-*/
-/**function processFormData() {
-  var name_element = document.getElementById("Autocomplete1");
-  var name = name_element.value;
-  getGameByName(name, res => printNamePrice(res));
-}*/
-
-/**
-  * Populate the Title and Price paragraphs and get the recommendations
-  * @param game the Game object returned from getGameByName
-*/
-/**function printNamePrice(game) {
-  document.getElementById("title_id").innerHTML = "Title: " + game['name'];
-  document.getElementById("price_id").innerHTML = "Price: $" + game['price'];
-  var rec_number_element = document.getElementById("recnumber");
-  var rec_number = rec_number_element.value;
-  //....., res => populateGraph(game['steam_id'], res));
-  var source = game['steam_id'];
-  var ids = [578080,289650,359550,230410,440];
-  populateGraph(source, ids);
-}*/
 
 /**
   * Populate the network graph
