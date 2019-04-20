@@ -8,6 +8,16 @@ var svg = d3.select("#svg1").append('svg')
   .attr('height', height);
 
 /**
+ * Add autocomplete to search bar
+*/
+var tags = ["Test1", "Test2"];
+$(function() {
+  $( "#Autocomplete1" ).autocomplete({
+    source: tags
+  });
+});
+
+/**
  * Retrieves game information from the databse by Steam id
  * @param steam_id steam id of the entry to retrieve
  */
@@ -120,7 +130,7 @@ function printTopReview(review) {
 function populateGraph(input, rec_list) {
   var links = [];
   for (game of rec_list) {
-    links.push({"source": input.name, "target": game.name});
+    links.push({"source": input.name.replace("®", ""), "target": game.name.replace("®", "")});
   }
 
   var nodes = {};
