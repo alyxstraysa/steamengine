@@ -10,11 +10,14 @@ var svg = d3.select("#svg1").append('svg')
 /**
  * Add autocomplete to search bar
 */
-var tags = ["Test1", "Test2"];
-$(function() {
-  $( "#Autocomplete1" ).autocomplete({
-    source: tags
+getAllGames().then(games => games.map(game => game.name)).then(tags => {
+
+  $(function() {
+    $( "#Autocomplete1" ).autocomplete({
+      source: tags
+    });
   });
+  console.log(tags[0]);
 });
 
 /**
