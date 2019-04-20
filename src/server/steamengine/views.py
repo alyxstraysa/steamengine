@@ -86,6 +86,13 @@ def get_tags(request: HttpRequest) -> HttpResponse:
     file = os.path.join(settings.BASE_DIR, 'server', 'steamengine', 'tags', 'dill.pickle')
 
     steam_id = request.GET.get('steam-id', None)
+
+    num = request.GET.get('max', 3)
+    try:
+        num = int(num)
+    except:
+        num = 3
+
     if steam_id is None:
         return JsonResponse({'tags': []})
 
@@ -95,7 +102,10 @@ def get_tags(request: HttpRequest) -> HttpResponse:
         if steam_id not in steam_tag_dict:
             return JsonResponse({'tags': []})
         else:
-            print(steam_tag_dict[steam_id])
-            return JsonResponse({'tags': steam_tag_dict[steam_id]})
+            steam_tag_extracted = steam_tag_dict[steam_id]
+
+            num = min(num, len(steam_tag_extracted))
+
+            return JsonResponse({'tags': steam_tag_dict[steam_id][:num]})
 
 
