@@ -1,12 +1,14 @@
 from __future__ import unicode_literals
+import os
+import numpy as np
+import pickle
 from django.shortcuts import render
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from django.views.generic import TemplateView
-import os
 from django.conf import settings
 from .models import *
-import numpy as np
+
 
 
 def index(request: HttpRequest) -> HttpResponse:
@@ -56,6 +58,12 @@ def get_game_by_name(request: HttpRequest) -> HttpResponse:
         return JsonResponse({'game': None})
     return JsonResponse({'game': model_to_dict(game)})
 
+def from_game_ids(x):
+    file = os.path.join(settings.BASE_DIR, 'server', 'steamengine', 'recommender', 'game_id_dict.dill')
+    with open(file, 'rb') as f:
+        game_id_dict = pickle.load(f)
+    return [try_dict(game_id_dict, i) for i in x]
+
 def to_game_ids(x):
     file = os.path.join(settings.BASE_DIR, 'server', 'steamengine', 'recommender', 'game_id_list.npy')
     game_id_list = np.load(file)
@@ -85,8 +93,7 @@ def get_recommendations(request: HttpRequest) -> HttpResponse:
     max:       Maximum number of recommendations to return
     """
     if 'game-id' in request.GET:
-        game_list = request.GET['game-id']
-        game_list = (try_call(x, int) for x in game_list)
+        game_list = from_game_ids(request.GET.getlist('game-id'))
         game_list = [x for x in game_list if x is not None]
     else:
         games = []
@@ -129,8 +136,14 @@ def get_tags(request: HttpRequest) -> HttpResponse:
     """
     pass
 
-def try_call(x, typ):
+def try_call(f, x):
     try:
-        return typ(x)
+        return f(x)
     except:
+        return None
+
+def try_dict(d, x):
+    if x in d:
+        return d[x]
+    else:
         return None
