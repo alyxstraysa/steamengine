@@ -62,6 +62,17 @@ function getRecommendations(ids, num=10, rec=1) {
 }
 
 /**
+ * Retrieves game reviews from a steam ids
+ * @param ids steam id to return reviews of
+ */
+function getReviews(id) {
+  var url = "http://127.0.0.1:8000/query";
+  var attrs = [["query-type", "get-reviews"], ["steam-id", id]];
+  var params = queryString(attrs);
+  return fetchJSON(url + params).then(res => res.review);
+}
+
+/**
  * Retrieves a list of all known games
  */
 function getAllGames() {
