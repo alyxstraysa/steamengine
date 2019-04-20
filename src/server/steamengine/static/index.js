@@ -50,6 +50,16 @@ function getRecommendations(ids, num=10, rec=1) {
 }
 
 /**
+ * Retrieves a list of all known games
+ */
+function getAllGames() {
+  var url = "http://127.0.0.1:8000/query";
+  var attrs = [["query-type", "get-all-games"]];
+  var params = queryString(attrs);
+  return fetchJSON(url + params).then(res => res.games);
+}
+
+/**
  * Returns the json result of a GET Promise
  * @param url query url
  */

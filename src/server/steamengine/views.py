@@ -31,6 +31,8 @@ def query(request: HttpRequest) -> HttpResponse:
         return get_reviews(request)
     elif query_type == 'get-tags':
         return get_tags(request)
+    elif query_type == 'get-all-games':
+        return get_all_games()
     return JsonResponse({})
 
 def get_game_by_id(request: HttpRequest) -> HttpResponse:
@@ -60,6 +62,12 @@ def get_game_by_name(request: HttpRequest) -> HttpResponse:
     if game is None:
         return JsonResponse({'game': None})
     return JsonResponse({'game': model_to_dict(game)})
+
+def get_all_games() -> HttpResponse:
+    """
+    Returns all games in the database
+    """
+    return JsonResponse({'games': [model_to_dict(game) for game in Game.objects.all()]})
 
 def from_game_ids(x):
     file = os.path.join(settings.BASE_DIR, 'server', 'steamengine', 'recommender', 'game_id_dict.dill')
