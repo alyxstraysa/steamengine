@@ -3,6 +3,9 @@ from django.shortcuts import render
 from django.forms.models import model_to_dict
 from django.http import HttpResponse, HttpRequest, JsonResponse
 from .models import *
+import os
+import pickle
+from django.conf import settings
 
 def index(request: HttpRequest) -> HttpResponse:
     return render(request, 'index.html', {})
@@ -79,4 +82,20 @@ def get_tags(request: HttpRequest) -> HttpResponse:
     game_id: Game Steam id
     num: Number of tags to return
     """
-    pass
+
+    file = os.path.join(settings.BASE_DIR, 'server', 'steamengine', 'tags', 'dill.pickle')
+
+    steam_id = request.GET.get('steam-id', None)
+    if steam_id is None:
+        return JsonResponse({'tags': []})
+
+    with open(file, 'rb') as pickled:
+        steam_tag_dict = pickle.load(pickled)
+
+        if steam_id not in steam_tag_dict:
+            return JsonResponse({'tags': []})
+        else:
+            print(steam_tag_dict[steam_id])
+            return JsonResponse({'tags': steam_tag_dict[steam_id]})
+
+
