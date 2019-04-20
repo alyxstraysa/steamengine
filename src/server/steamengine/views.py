@@ -125,10 +125,24 @@ def get_reviews(request: HttpRequest) -> HttpResponse:
     Returns a list of game reviews
 
     game_ids:   List of Steam ids to use for recommendation
-    filter_ids: List of Steam ids to filter
-    num:        Maximum number of reviews to return
     """
-    pass
+    file = os.path.join(settings.BASE_DIR, 'server', 'steamengine', 'tags', 'reviews.pickle')
+
+    steam_id = request.GET.get('steam-id', None)
+
+    if steam_id is None:
+        return JsonResponse({'tags': []})
+
+    with open(file, 'rb') as pickled:
+        review_dict = pickle.load(pickled)
+
+        if steam_id not in review_dict:
+            return JsonResponse({'tags': []})
+        else:
+            review = review_dict[steam_id]
+
+            return JsonResponse({'review': review_dict[steam_id]})
+
 
 def get_tags(request: HttpRequest) -> HttpResponse:
     """
