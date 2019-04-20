@@ -10,11 +10,14 @@ var svg = d3.select("#svg1").append('svg')
 /**
  * Add autocomplete to search bar
 */
-var tags = ["Test1", "Test2"];
-$(function() {
-  $( "#Autocomplete1" ).autocomplete({
-    source: tags
+getAllGames().then(games => games.map(game => game.name)).then(tags => {
+
+  $(function() {
+    $( "#Autocomplete1" ).autocomplete({
+      source: tags
+    });
   });
+  console.log(tags[0]);
 });
 
 /**
@@ -23,10 +26,10 @@ $(function() {
  */
 function getGameBySteamID(steam_id) {
   var url = "http://127.0.0.1:8000/query";
-  var params = queryString({
-    "query-type": "get-game-by-steam-id",
-    "steam-id": steam_id
-  });
+  var params = queryString([
+    ["query-type", "get-game-by-steam-id"],
+    ["steam-id", steam_id],
+  ]);
   return fetchJSON(url + params).then(res => res.game);
 }
 
@@ -36,11 +39,47 @@ function getGameBySteamID(steam_id) {
  */
 function getGameByName(name) {
   var url = "http://127.0.0.1:8000/query";
-  var params = queryString({
-    "query-type": "get-game-by-name",
-    "name": name
-  });
+  var params = queryString([
+    ["query-type", "get-game-by-name"],
+    ["name", name]
+  ]);
   return fetchJSON(url + params).then(res => res.game);
+}
+
+/**
+ * Retrieves game recommendations from a list of steam ids
+ * @param ids list of steam ids to base recommendations on
+ * @param num number of recommendations to return
+ * @param rec recommender system to use
+ */
+function getRecommendations(ids, num=10, rec=1) {
+  var url = "http://127.0.0.1:8000/query";
+  var attrs = [["query-type", "get-recommendations"], ["max", num], ["rec", rec]];
+  if (!Array.isArray(ids)) ids = [ids];
+  attrs = attrs.concat(ids.map(id => ["game-id", id]));
+  var params = queryString(attrs);
+  return fetchJSON(url + params).then(res => res.games);
+}
+
+/**
+ * Retrieves game reviews from a steam ids
+ * @param ids steam id to return reviews of
+ */
+function getReviews(id) {
+  var url = "http://127.0.0.1:8000/query";
+  var attrs = [["query-type", "get-reviews"], ["steam-id", id]];
+  var params = queryString(attrs);
+  return fetchJSON(url + params).then(res => res.review);
+}
+
+/**
+ * Retrieves a list of all known games
+ */
+function getAllGames() {
+  var url = "http://127.0.0.1:8000/query";
+  var attrs = [["query-type", "get-all-games"]];
+  var params = queryString(attrs);
+  return fetchJSON(url + params).then(res => res.games);
 }
 
 /**
@@ -53,21 +92,16 @@ function fetchJSON(url) {
 
 /**
  * Generates a GET request string with the given arguments
- * @param args dictionary with entries form name: value, where name is a GET
+ * @param args list with entries of the form (name, value), where name is a GET
                request argument name, and value is its value
  */
 function queryString(args) {
-  var first = true;
-  var str = "";
-  for (var arg in args) {
-    if (first) {
-      first = false;
-      str = str + "?" + arg + "=" + args[arg]
-    } else {
-      str = str + "&" + arg + "=" + args[arg]
-    }
-  }
-  return str;
+  if (args.length == 0) return "";
+  var first_arg = args[0];
+  var first_string = "?" + first_arg[0] + "=" + first_arg[1];
+  var last_args = args.slice(1);
+  var last_string = last_args.map(p => "&" + p[0] + "=" + p[1]).join("");
+  return first_string + last_string;
 }
 
 /**
@@ -82,11 +116,14 @@ function processFormData() {
 
 function initializeUI(game) {
   processGame(game);
-  var rec_number_element = document.getElementById("recnumber");
-  var rec_number = rec_number_element.value;
-  //getRecommendations(game_list = [game['steam_id']], num = rec_number).then(ids => processRecommendations(game, ids.games));
-  var ids = [289650,359550,230410,440];
-  Promise.all(ids.map(getGameBySteamID)).then(rec_list => populateGraph(game, rec_list));
+  var numRecsElement = document.getElementById("recnumber");
+  var numRecs = numRecsElement.value;
+  if (numRecs <= 0) {
+    numRecs = 5;
+  }
+  getRecommendations(game.steam_id, numRecs, 2)
+    .then(ids => Promise.all(ids.map(getGameBySteamID)))
+    .then(recList => populateGraph(game, recList));
 }
 
 function processRecommendations(game, ids) {
@@ -130,6 +167,7 @@ function printTopReview(review) {
 function populateGraph(input, rec_list) {
   var links = [];
   for (game of rec_list) {
+    if (game == null) continue;
     links.push({"source": input.name.replace("®", ""), "target": game.name.replace("®", "")});
   }
 

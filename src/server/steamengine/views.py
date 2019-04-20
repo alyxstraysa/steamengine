@@ -31,6 +31,8 @@ def query(request: HttpRequest) -> HttpResponse:
         return get_reviews(request)
     elif query_type == 'get-tags':
         return get_tags(request)
+    elif query_type == 'get-all-games':
+        return get_all_games()
     return JsonResponse({})
 
 def get_game_by_id(request: HttpRequest) -> HttpResponse:
@@ -60,6 +62,12 @@ def get_game_by_name(request: HttpRequest) -> HttpResponse:
     if game is None:
         return JsonResponse({'game': None})
     return JsonResponse({'game': model_to_dict(game)})
+
+def get_all_games() -> HttpResponse:
+    """
+    Returns all games in the database
+    """
+    return JsonResponse({'games': [model_to_dict(game) for game in Game.objects.all()]})
 
 def from_game_ids(x):
     file = os.path.join(settings.BASE_DIR, 'server', 'steamengine', 'recommender', 'game_id_dict.dill')
@@ -91,15 +99,15 @@ def get_recommendations(request: HttpRequest) -> HttpResponse:
     """
     Returns a list of game recommendations
 
-    game_list: List of steam ids of games
-    rec:       Recommender to use
-    max:       Maximum number of recommendations to return
+    game-id: List of steam ids of games
+    rec: Recommender to use
+    max: Maximum number of recommendations to return
     """
     if 'game-id' in request.GET:
         game_list = from_game_ids(request.GET.getlist('game-id'))
         game_list = [x for x in game_list if x is not None]
     else:
-        games = []
+        game_list = []
     if len(game_list) == 0:
         return JsonResponse({'games': []})
     max_games = request.GET.get('max', 10)
@@ -125,10 +133,24 @@ def get_reviews(request: HttpRequest) -> HttpResponse:
     Returns a list of game reviews
 
     game_ids:   List of Steam ids to use for recommendation
-    filter_ids: List of Steam ids to filter
-    num:        Maximum number of reviews to return
     """
-    pass
+    file = os.path.join(settings.BASE_DIR, 'server', 'steamengine', 'tags', 'reviews.pickle')
+
+    steam_id = request.GET.get('steam-id', None)
+
+    if steam_id is None:
+        return JsonResponse({'tags': []})
+
+    with open(file, 'rb') as pickled:
+        review_dict = pickle.load(pickled)
+
+        if steam_id not in review_dict:
+            return JsonResponse({'tags': []})
+        else:
+            review = review_dict[steam_id]
+
+            return JsonResponse({'review': review_dict[steam_id]})
+
 
 def get_tags(request: HttpRequest) -> HttpResponse:
     """
