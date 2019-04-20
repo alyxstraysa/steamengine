@@ -99,7 +99,7 @@ def get_recommendations(request: HttpRequest) -> HttpResponse:
         game_list = from_game_ids(request.GET.getlist('game-id'))
         game_list = [x for x in game_list if x is not None]
     else:
-        games = []
+        game_list = []
     if len(game_list) == 0:
         return JsonResponse({'games': []})
     max_games = request.GET.get('max', 10)
