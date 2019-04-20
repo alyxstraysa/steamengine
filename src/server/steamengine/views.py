@@ -91,15 +91,15 @@ def get_recommendations(request: HttpRequest) -> HttpResponse:
     """
     Returns a list of game recommendations
 
-    game_list: List of steam ids of games
-    rec:       Recommender to use
-    max:       Maximum number of recommendations to return
+    game-id: List of steam ids of games
+    rec: Recommender to use
+    max: Maximum number of recommendations to return
     """
     if 'game-id' in request.GET:
         game_list = from_game_ids(request.GET.getlist('game-id'))
         game_list = [x for x in game_list if x is not None]
     else:
-        games = []
+        game_list = []
     if len(game_list) == 0:
         return JsonResponse({'games': []})
     max_games = request.GET.get('max', 10)
