@@ -7,54 +7,39 @@ var svg = d3.select("#svg1").append('svg')
   .attr('width', width)
   .attr('height', height);
 
-getGameBySteamID(10, res => console.log(res));
-getGameByName("Counter-Strike", res => console.log(res));
 
 /**
  * Retrieves game information from the databse by Steam id
- * @param id steam id of the entry to retrieve
- * @param callback the function to call with the response results
+ * @param steam_id steam id of the entry to retrieve
  */
-function getGameBySteamID(steam_id, callback) {
+function getGameBySteamID(steam_id) {
   var url = "http://127.0.0.1:8000/query";
   var params = queryString({
     "query-type": "get-game-by-steam-id",
     "steam-id": steam_id
   });
-  getCallback(url + params, res => callback(res.game))
+  return fetchJSON(url + params).then(res => res.game);
 }
 
 /**
  * Retrieves game information from the databse by game name
  * @param name name of the entry to retrieve
- * @param callback the function to call with the response results
  */
-function getGameByName(name, callback) {
+function getGameByName(name) {
   var url = "http://127.0.0.1:8000/query";
   var params = queryString({
     "query-type": "get-game-by-name",
     "name": name
   });
-  getCallback(url + params, res => callback(res.game))
+  return fetchJSON(url + params).then(res => res.game);
 }
 
 /**
- * Sends GET query and calls a callback function on response
+ * Returns the json result of a GET Promise
  * @param url query url
- * @param callback the function to call with the response results
  */
-function getCallback(url, callback) {
-  var xhttp = new XMLHttpRequest();
-  xhttp.onreadystatechange = processRequest;
-
-  function processRequest() {
-    if (xhttp.readyState === 4 && xhttp.status === 200) {
-      var response = JSON.parse(xhttp.response);
-      callback(response);
-    }
-  }
-  xhttp.open("GET", url, true);
-  xhttp.send();
+function fetchJSON(url) {
+  return fetch(url).then(res => res.json());
 }
 
 /**
@@ -83,7 +68,7 @@ function processFormData() {
   svg.selectAll("*").remove();
   var name_element = document.getElementById("Autocomplete1");
   var name = name_element.value;
-  getGameByName(name, res => initializeUI(res));
+  getGameByName(name).then(initializeUI);
 }
 
 function initializeUI(game) {
@@ -93,10 +78,8 @@ function initializeUI(game) {
   //getRecommendations(game_list = [game['steam_id']], num = rec_number, res => populateGraph(game['steam_id'], res));
   var ids = [289650,359550,230410,440];
   var input = game['steam_id']
-  //populateGraph(input, ids);
-  var holder = [];
-  var counter = 0;
-  getGameObjects(game, ids, holder, ids.length, counter);
+
+  Promise.all(ids.map(getGameBySteamID)).then(vals => populateGraph(game, vals));
 }
 
 function processGame(game) {
@@ -168,10 +151,9 @@ function getGameObjects(game, rec_list, obj_list, length, counter) {
   * @param rec_list the ids returned form the recommendation algorithm
 */
 function populateGraph(input, rec_list) {
-  console.log(input, rec_list);
-  /**var links = [];
-  for (i in ids) {
-    links.push({"source": input, "target": ids[i]});
+  var links = [];
+  for (game of rec_list) {
+    links.push({"source": input.steam_id, "target": game.steam_id});
   }
 
   var nodes = {};
@@ -239,7 +221,7 @@ function populateGraph(input, rec_list) {
 
   // Show game information on click
   node.on("click", function(d) {
-    getGameBySteamID(d.name, res => processGame(res));
+    getGameBySteamID(d.name).then(processGame);
   });
 
   // label the nodes
@@ -300,6 +282,5 @@ function populateGraph(input, rec_list) {
       d.fy = null;
     }
 
-  };*/
+  };
   }
-
