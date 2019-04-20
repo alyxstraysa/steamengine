@@ -7,6 +7,15 @@ var svg = d3.select("#svg1").append('svg')
   .attr('width', width)
   .attr('height', height);
 
+/**
+ * Add autocomplete to search bar
+*/
+var tags = ["Test1", "Test2"];
+$(function() {
+  $( "#Autocomplete1" ).autocomplete({
+    source: tags
+  });
+});
 
 /**
  * Retrieves game information from the databse by Steam id
@@ -95,8 +104,15 @@ function initializeUI(game) {
   processGame(game);
   var rec_number_element = document.getElementById("recnumber");
   var rec_number = rec_number_element.value;
-  //getRecommendations(game_list = [game['steam_id']], num = rec_number, res => populateGraph(game['steam_id'], res));
+  //getRecommendations(game_list = [game['steam_id']], num = rec_number).then(ids => processRecommendations(game, ids.games));
   var ids = [289650,359550,230410,440];
+  Promise.all(ids.map(getGameBySteamID)).then(rec_list => populateGraph(game, rec_list));
+}
+
+function processRecommendations(game, ids) {
+  for (var i=0; i<ids.length; i++) {
+    ids[i] = parseInt(ids[i], 10);
+  }
   Promise.all(ids.map(getGameBySteamID)).then(rec_list => populateGraph(game, rec_list));
 }
 
@@ -134,7 +150,7 @@ function printTopReview(review) {
 function populateGraph(input, rec_list) {
   var links = [];
   for (game of rec_list) {
-    links.push({"source": input.steam_id, "target": game.steam_id});
+    links.push({"source": input.name.replace("®", ""), "target": game.name.replace("®", "")});
   }
 
   var nodes = {};
@@ -180,7 +196,7 @@ function populateGraph(input, rec_list) {
   node.append("circle")
     .attr("r", 35)
     .attr("class", function(d) {
-      if (d.name == input) {
+      if (d.name == input.name) {
         return "source";
       } else {
         return "target";
@@ -202,7 +218,7 @@ function populateGraph(input, rec_list) {
 
   // Show game information on click
   node.on("click", function(d) {
-    getGameBySteamID(d.name).then(processGame);
+    getGameByName(d.name).then(processGame);
   });
 
   // label the nodes
