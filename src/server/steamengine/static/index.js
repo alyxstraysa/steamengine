@@ -116,11 +116,14 @@ function processFormData() {
 
 function initializeUI(game) {
   processGame(game);
-  var rec_number_element = document.getElementById("recnumber");
-  var rec_number = rec_number_element.value;
-  //getRecommendations(game_list = [game['steam_id']], num = rec_number).then(ids => processRecommendations(game, ids.games));
-  var ids = [289650,359550,230410,440];
-  Promise.all(ids.map(getGameBySteamID)).then(rec_list => populateGraph(game, rec_list));
+  var numRecsElement = document.getElementById("recnumber");
+  var numRecs = numRecsElement.value;
+  if (numRecs <= 0) {
+    numRecs = 5;
+  }
+  getRecommendations(game.steam_id, numRecs, 2)
+    .then(ids => Promise.all(ids.map(getGameBySteamID)))
+    .then(recList => populateGraph(game, recList));
 }
 
 function processRecommendations(game, ids) {
@@ -164,6 +167,7 @@ function printTopReview(review) {
 function populateGraph(input, rec_list) {
   var links = [];
   for (game of rec_list) {
+    if (game == null) continue;
     links.push({"source": input.name.replace("®", ""), "target": game.name.replace("®", "")});
   }
 
