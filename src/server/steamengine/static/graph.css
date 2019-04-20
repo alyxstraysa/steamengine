@@ -1,0 +1,28 @@
+/* Network Graph */
+path.link {
+  fill: none;
+  stroke: #333956;
+  stroke-width: 2.5px;
+}
+
+circle {
+  stroke: #333956;
+  stroke: black;
+  stroke-width: 2.5px;
+}
+
+.source {
+  fill: #333956;
+}
+
+.target {
+  fill: #3AAE09;
+}
+
+text {
+  fill: #000;
+  font: 15px sans-serif;
+  text-anchor: middle;
+  dominant-baseline: hanging;
+  pointer-events: none;
+}
