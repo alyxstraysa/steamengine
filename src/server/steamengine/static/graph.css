@@ -1,0 +1,35 @@
+/* Network Graph */
+path.link {
+  fill: none;
+  stroke: #333956;
+  stroke-width: 2.5px;
+}
+
+circle {
+  stroke: #333956;
+  stroke-width: 2.5px;
+}
+
+.source {
+  fill: #5c6b73;
+}
+
+circle.source:hover{
+  fill: #253237;
+}
+
+.target {
+  fill: #c2dfe3;
+}
+
+circle:hover {
+  fill: #e0fbfc;
+}
+
+text {
+  fill: #000;
+  font: 15px sans-serif;
+  text-anchor: middle;
+  dominant-baseline: hanging;
+  pointer-events: none;
+}
