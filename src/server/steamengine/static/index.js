@@ -132,7 +132,7 @@ var input = document.getElementById("recnumber");
 input.addEventListener("keyup", function(event) {
   if (event.keyCode === 13) {
    event.preventDefault();
-   document.getElementById("testbutton").click();
+   document.getElementById("onenter").click();
   }
 });
 
