@@ -27,6 +27,8 @@ def query(request: HttpRequest) -> HttpResponse:
         return get_game_by_name(request)
     elif query_type == 'get-recommendations':
         return get_recommendations(request)
+    elif query_type == 'get-distances':
+        return get_distances(request)
     elif query_type == 'get-reviews':
         return get_reviews(request)
     elif query_type == 'get-tags':
@@ -95,6 +97,12 @@ def recommend(X, selected, n):
         j += 1
     return recommended
 
+def distances(X, base_ids, ids):
+    sampled_vectors = X[:,base_ids]
+    average_vector = np.sum(base_ids, axis=1)
+    distances = np.linalg.norm(X.T - average_vector, axis=1)
+    return distances[ids]
+
 def get_recommendations(request: HttpRequest) -> HttpResponse:
     """
     Returns a list of game recommendations
@@ -127,6 +135,43 @@ def get_recommendations(request: HttpRequest) -> HttpResponse:
     recommended = recommend(X, game_list, max_games)
     recommended_ids = to_game_ids(recommended)
     return JsonResponse({'games': recommended_ids})
+
+def get_distances(request: HttpRequest) -> HttpResponse:
+    """
+    Returns a list of game feature space distances
+
+    base-id : Base steam id
+    game-id: List of steam ids of games
+    rec: Recommender to use
+    """
+    if 'base-id' not in request.GET:
+        return JsonResponse({})
+    base_id = from_game_ids([request.GET.get('base-id', 0)])
+    if base_id is None:
+        return JsonResponse({})
+    if 'game-id' in request.GET:
+        game_list = from_game_ids(request.GET.getlist('game-id'))
+        game_list_ids = [(x, y) for x, y in zip(game_list,request.GET.getlist('game-id')) if x is not None]
+        game_list = [p[0] for p in game_list_ids]
+        game_ids = [p[1] for p in game_list_ids]
+    else:
+        game_list = []
+    if len(game_list) == 0:
+        return JsonResponse({})
+    rec = request.GET.get('rec', 1)
+    try:
+        rec = int(rec)
+    except:
+        rec = 1
+    if rec <= 0 or rec > 6:
+        rec = (rec % 6) + 1
+    file = os.path.join(settings.BASE_DIR, 'server', 'steamengine', 'recommender', 'X_%s.npy' % rec)
+    X = np.load(file)
+    d = distances(X, [base_id], game_list)
+    print(game_ids)
+    print(d)
+    print({'distances': {x:d for d, x in zip(d, game_ids)}})
+    return JsonResponse({'distances': {x:d for d, x in zip(d, game_ids)}})
 
 def get_reviews(request: HttpRequest) -> HttpResponse:
     """

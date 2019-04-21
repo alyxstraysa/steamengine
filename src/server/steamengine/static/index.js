@@ -60,6 +60,21 @@ function getRecommendations(ids, num=10, rec=1) {
 }
 
 /**
+ * Retrieves game recommendations from a list of steam ids
+ * @param baseId steam id of base game
+ * @param ids list of steam ids to retrieve distance from base game
+ * @param rec recommender system to use
+ */
+function getDistances(baseId, ids, rec=1) {
+  var url = "http://127.0.0.1:8000/query";
+  var attrs = [["query-type", "get-distances"], ["base-id", baseId], ["rec", rec]];
+  if (!Array.isArray(ids)) ids = [ids];
+  attrs = attrs.concat(ids.map(id => ["game-id", id]));
+  var params = queryString(attrs);
+  return fetchJSON(url + params).then(res => res.distances);
+}
+
+/**
  * Retrieves game reviews from a steam ids
  * @param ids steam id to return reviews of
  */
