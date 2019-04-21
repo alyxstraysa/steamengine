@@ -11,13 +11,11 @@ var svg = d3.select("#svg1").append('svg')
  * Add autocomplete to search bar
 */
 getAllGames().then(games => games.map(game => game.name)).then(tags => {
-
   $(function() {
     $( "#Autocomplete1" ).autocomplete({
       source: tags
     });
   });
-  console.log(tags[0]);
 });
 
 /**
@@ -73,6 +71,17 @@ function getReviews(id) {
 }
 
 /**
+ * Retrieves game tags for a steam id
+ * @param id steam id for which to return tags
+*/
+function getTags(id, num=5) {
+  var url = "http://127.0.0.1:8000/query";
+  var attrs = [["query-type", "get-tags"], ["steam-id", id], ["max", num]];
+  var params = queryString(attrs);
+  return fetchJSON(url + params).then(res => res.tags);
+}
+
+/**
  * Retrieves a list of all known games
  */
 function getAllGames() {
@@ -111,6 +120,7 @@ function processFormData() {
   svg.selectAll("*").remove();
   var name_element = document.getElementById("Autocomplete1");
   var name = name_element.value;
+  //document.getElementById("#svg1").style.backgroundImage = "none";
   getGameByName(name).then(initializeUI);
 }
 
@@ -126,17 +136,10 @@ function initializeUI(game) {
     .then(recList => populateGraph(game, recList));
 }
 
-function processRecommendations(game, ids) {
-  for (var i=0; i<ids.length; i++) {
-    ids[i] = parseInt(ids[i], 10);
-  }
-  Promise.all(ids.map(getGameBySteamID)).then(rec_list => populateGraph(game, rec_list));
-}
-
 function processGame(game) {
+  getTags(game['steam_id']).then(res => printTags(res));
+  getReviews(game['steam_id']).then(res => printTopReview(res));
   printNamePrice(game);
-  //getTags(game['steam_id'], res => printTags(res));
-  //getTopReview(game['steam_id'], res => printTopReview(res));
 }
 
 function printNamePrice(game) {
@@ -144,19 +147,28 @@ function printNamePrice(game) {
   document.getElementById("price_id").innerHTML = "Price: $" + game['price'];
 }
 
-function printTags(tag_list) {
-  document.getElementById("tag_id").innerHTML = "Tags: ";
-  for (i in tags) {
-    if (i < tags.length - 1) {
-      document.getElementById("tag_id").innerHTML += " " + tags[i] + ",";
-    } else {
-      document.getElementById("tag_id").innerHTML += " " + tags[i];
+function printTags(tags) {
+  document.getElementById("tag_id").innerHTML = "Tags:";
+  if (tags == null) {
+    document.getElementById("tag_id").innerHTML += " Not available";
+  }
+  else {
+    for (i in tags) {
+      if (i < tags.length - 1) {
+        document.getElementById("tag_id").innerHTML += " " + tags[i] + ",";
+      } else {
+        document.getElementById("tag_id").innerHTML += " " + tags[i];
+      }
     }
   }
 }
 
 function printTopReview(review) {
-  document.getElementById("review_id").innerHTML = "Top Review: " + review;
+  if (review == null) {
+    document.getElementById("review_id").innerHTML = "Top Review: Not available";
+  } else {
+    document.getElementById("review_id").innerHTML = "Top Review: " + review;
+  }
 }
 
 /**
@@ -168,7 +180,7 @@ function populateGraph(input, rec_list) {
   var links = [];
   for (game of rec_list) {
     if (game == null) continue;
-    links.push({"source": input.name.replace("®", ""), "target": game.name.replace("®", "")});
+    links.push({"source": input.name, "target": game.name});
   }
 
   var nodes = {};
