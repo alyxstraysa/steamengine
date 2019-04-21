@@ -11,11 +11,15 @@ circle {
 }
 
 .source {
-  fill: #333956;
+  fill: #5c6b73;
 }
 
 .target {
-  fill: #3AAE09;
+  fill: #c2dfe3;
+}
+
+circle:hover {
+  fill: #e0fbfc;
 }
 
 text {
