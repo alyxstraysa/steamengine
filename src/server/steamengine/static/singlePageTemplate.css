@@ -107,6 +107,13 @@ body {
 	margin-right: 20px;
 }
 
+/*#svg1 {
+	background-image: url("https://i.ibb.co/N2Kprm8/background-opacity.png");
+	background-size: auto auto;
+	background-position: center center;
+	background-repeat: no-repeat;
+}*/
+
 .main_column2 {
 	width: 25%;
 	height:100%;
@@ -130,14 +137,13 @@ body {
 
 #placeholder {
  display: inline-block;
- width: 100%;
+ width: 85%;
  height: 95%;
 }
 
 #review_id {
+	height: 530px;
 	overflow: hidden;
-	text-overflow: ellipsis;
-	height: 160px;
 }
 
 .footer_banner {
@@ -158,7 +164,6 @@ label {
 form{
 	padding-bottom: 5px;
 }
-
 
 /* Small Desktops */
 @media (min-width: 768px) and (max-width: 1096px) {
