@@ -149,23 +149,23 @@ function printNamePrice(game) {
 
 function printTags(tags) {
   document.getElementById("tag_id").innerHTML = "Tags:";
-  if (tags == null) {
-    document.getElementById("tag_id").innerHTML += " Not available";
+  if (tags == 0) {
+    document.getElementById("tag_id").innerHTML += " Pending";
   }
   else {
     for (i in tags) {
       if (i < tags.length - 1) {
-        document.getElementById("tag_id").innerHTML += " " + tags[i] + ",";
+        document.getElementById("tag_id").innerHTML += " " + tags[i].trim() + ",";
       } else {
-        document.getElementById("tag_id").innerHTML += " " + tags[i];
+        document.getElementById("tag_id").innerHTML += " " + tags[i].trim();
       }
     }
   }
 }
 
 function printTopReview(review) {
-  if (review == null) {
-    document.getElementById("review_id").innerHTML = "Top Review: Not available";
+  if (review == null | review == "\n") {
+    document.getElementById("review_id").innerHTML = "Top Review: Pending";
   } else {
     document.getElementById("review_id").innerHTML = "Top Review: " + review;
   }
@@ -310,4 +310,8 @@ function populateGraph(input, rec_list) {
     }
 
   };
+  }
+
+  function addLike() {
+    //document.getElementById("");
   }
