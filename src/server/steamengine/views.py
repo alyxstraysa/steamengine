@@ -163,11 +163,11 @@ def get_tags(request: HttpRequest) -> HttpResponse:
 
     steam_id = request.GET.get('steam-id', None)
 
-    num = request.GET.get('max', 3)
+    num = request.GET.get('max', 5)
     try:
         num = int(num)
     except:
-        num = 3
+        num = 5
 
     if steam_id is None:
         return JsonResponse({'tags': []})

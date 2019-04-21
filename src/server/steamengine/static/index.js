@@ -74,7 +74,7 @@ function getReviews(id) {
  * Retrieves game tags for a steam id
  * @param id steam id for which to return tags
 */
-function getTags(id, num=3) {
+function getTags(id, num=5) {
   var url = "http://127.0.0.1:8000/query";
   var attrs = [["query-type", "get-tags"], ["steam-id", id], ["max", num]];
   var params = queryString(attrs);
@@ -226,7 +226,7 @@ function populateGraph(input, rec_list) {
   node.append("circle")
     .attr("r", 35)
     .attr("class", function(d) {
-      if (d.name == input.name) {
+      if (d.name == input.name.replace(/®|©|™/g, "") {
         return "source";
       } else {
         return "target";
