@@ -124,6 +124,18 @@ function processFormData() {
   getGameByName(name).then(initializeUI);
 }
 
+
+/*
+trying to get the enter button to work
+*/
+var input = document.getElementById("recnumber");
+input.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {
+   event.preventDefault();
+   document.getElementById("onenter").click();
+  }
+});
+
 function initializeUI(game) {
   processGame(game);
   var numRecsElement = document.getElementById("recnumber");
