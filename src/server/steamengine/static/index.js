@@ -150,7 +150,7 @@ function printNamePrice(game) {
 function printTags(tags) {
   document.getElementById("tag_id").innerHTML = "Tags:";
   if (tags == null) {
-    document.getElementById("tag_id").innerHTML += "Not available"
+    document.getElementById("tag_id").innerHTML += " Not available";
   }
   else {
     for (i in tags) {
@@ -180,7 +180,7 @@ function populateGraph(input, rec_list) {
   var links = [];
   for (game of rec_list) {
     if (game == null) continue;
-    links.push({"source": input.name.replace(/®|©|™/g, ""), "target": game.name.replace(/®|©|™/g, "")});
+    links.push({"source": input.name, "target": game.name});
   }
 
   var nodes = {};
@@ -226,7 +226,7 @@ function populateGraph(input, rec_list) {
   node.append("circle")
     .attr("r", 35)
     .attr("class", function(d) {
-      if (d.name == input.name.replace(/®|©|™/g, "") {
+      if (d.name == input.name) {
         return "source";
       } else {
         return "target";
