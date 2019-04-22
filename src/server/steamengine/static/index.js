@@ -65,6 +65,21 @@ function getRecommendations(ids, num=10, rec=1) {
 }
 
 /**
+ * Retrieves game recommendations from a list of steam ids
+ * @param baseId steam id of base game
+ * @param ids list of steam ids to retrieve distance from base game
+ * @param rec recommender system to use
+ */
+function getDistances(baseId, ids, rec=1) {
+  var url = "http://127.0.0.1:8000/query";
+  var attrs = [["query-type", "get-distances"], ["base-id", baseId], ["rec", rec]];
+  if (!Array.isArray(ids)) ids = [ids];
+  attrs = attrs.concat(ids.map(id => ["game-id", id]));
+  var params = queryString(attrs);
+  return fetchJSON(url + params).then(res => res.distances);
+}
+
+/**
  * Retrieves game reviews from a steam ids
  * @param ids steam id to return reviews of
  */
@@ -129,6 +144,18 @@ function processFormData() {
   getGameByName(name).then(initializeUI);
 }
 
+
+/*
+trying to get the enter button to work
+*/
+var input = document.getElementById("recnumber");
+input.addEventListener("keyup", function(event) {
+  if (event.keyCode === 13) {
+   event.preventDefault();
+   document.getElementById("onenter").click();
+  }
+});
+
 function initializeUI(game) {
   processGame(game);
   var numRecsElement = document.getElementById("recnumber");
@@ -138,7 +165,20 @@ function initializeUI(game) {
   }
   getRecommendations(game.steam_id, numRecs, 2)
     .then(ids => Promise.all(ids.map(getGameBySteamID)))
-    .then(recList => populateGraph(game, recList));
+    .then(recList => calculateWeights(game, recList));
+}
+
+/*
+ *calculate the weights of the steam games
+*/
+function calculateWeights(game, rec_list){
+  var rec_ids = [];
+
+  for (rec of rec_list){
+    if (rec == null) continue;
+    rec_ids.push(rec.steam_id);
+  }
+  getDistances(game.steam_id, rec_ids, 2).then(distances => populateGraph(game, rec_list, distances));
 }
 
 function processGame(game) {
@@ -181,21 +221,36 @@ function printTopReview(review) {
   * @param input the id of the searched game
   * @param rec_list the ids returned form the recommendation algorithm
 */
-function populateGraph(input, rec_list) {
+
+function populateGraph(input, rec_list, distances) {
+  var distance_list = Object.values(distances);
+  var max_distance = Math.max(...distance_list);
+  var min_distance = Math.min(...distance_list);
+
+  console.log(max_distance);
+  console.log(min_distance);
+
+  var weightScake = d3.scaleLinear()
+                    .domain([min_distance, max_distance])
+                    .range([20, 60]);
+
   var links = [];
   for (game of rec_list) {
     if (game == null) continue;
-    links.push({"source": input.name, "target": game.name});
+    links.push({"source": input.name, "target": game.name, "weight": weightScake(distances[game.steam_id])});
   }
+
+
+  console.log(links)
 
   var nodes = {};
 
   // Compute the distinct nodes from the links
   links.forEach(function(link) {
     link.source = nodes[link.source] ||
-        (nodes[link.source] = {name: link.source});
+        (nodes[link.source] = {name: link.source, weight: 35});
     link.target = nodes[link.target] ||
-        (nodes[link.target] = {name: link.target});
+        (nodes[link.target] = {name: link.target, weight: link.weight});
   });
 
   var force = d3.forceSimulation()
@@ -229,7 +284,9 @@ function populateGraph(input, rec_list) {
 
   // add the nodes
   node.append("circle")
-    .attr("r", 35)
+    .attr("r", function(d) {
+      return d.weight;
+    })
     .attr("class", function(d) {
       if (d.name == input.name) {
         return "source";
@@ -289,7 +346,7 @@ function populateGraph(input, rec_list) {
         return "translate(" + d.x + "," + d.y + ")"; })
     label
         .attr("transform", function(d) {
-        return "translate(" + d.x + "," + (d.y + 35 + 5) + ")"; })
+        return "translate(" + d.x + "," + (d.y + d.weight + 5) + ")"; })
   };
 
   function dragstarted(d) {
