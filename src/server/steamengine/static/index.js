@@ -19,6 +19,11 @@ getAllGames().then(games => games.map(game => game.name)).then(tags => {
 });
 
 /**
+ * Create a global variable to hold liked games
+*/
+var liked_games = [];
+
+/**
  * Retrieves game information from the databse by Steam id
  * @param steam_id steam id of the entry to retrieve
  */
@@ -312,6 +317,16 @@ function populateGraph(input, rec_list) {
   };
   }
 
-  function addLike() {
-    //document.getElementById("");
+  function processLike() {
+    var game_title = document.getElementById("title_id").textContent;
+    if (game_title == "Title: ") {
+      ;
+    }
+    else {
+      getGameByName(game_title.replace("Title: ", "")).then(addLike);
+    }
+  }
+
+  function addLike(game) {
+    liked_games.push(game['steam_id']);
   }
