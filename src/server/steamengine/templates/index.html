@@ -41,12 +41,12 @@
   <section class = "main_picture">
     <article class="main_column1">
       <h3>RECOMMENDATIONS</h3>
-	<div id="svg1"></div>
+	    <div id="svg1"></div>
     </article>
     <article class="main_column2">
       <h3>GAME INFORMATION</h3>
 		<div id="placeholder">
-      <input type = "button" value = "Like" onclick="processLike();">
+      <input type = "button" value = "Like" onclick="processLike()">
       <p id="title_id">Title:</p>
       <p id="price_id">Price:</p>
       <p id="tag_id">Tags:</p>
@@ -56,15 +56,22 @@
   </section>
 
 
-<form>
-	<label>
-	SEARCH: <input type="text" id="Autocomplete1">
-	</label>
-	<label>
-	RECOMMENDATIONS: <input type="number" id="recnumber" name="recnumber">
-	<input type = "button" id="onenter" value = "GO" onclick="processFormData();">
-	</label>
-	</form>
+<div class="form_container">
+  <form>
+	 <label>
+	 SEARCH: <input type="text" id="Autocomplete1">
+	 </label>
+	 <label>
+	 RECOMMENDATIONS: <input type="number" id="recnumber" name="recnumber">
+	 <input type = "button" id="onenter" value = "GO" onclick="processFormData()">
+	 </label>
+  </form>
+
+  <form id="recalculate_reset">
+    <input type="button" id="recalculate" value="RECALCULATE GRAPH" onclick="reprocessGraph()">
+    <input type="button" id="reset" value="RESET LIKES" onclick="resetLikes()">
+  </form>
+</div>
 
 
 

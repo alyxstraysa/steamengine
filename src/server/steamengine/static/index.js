@@ -146,7 +146,7 @@ function processFormData() {
 
 
 /*
-trying to get the enter button to work
+ * Add enter functionality to the GO button
 */
 var input = document.getElementById("recnumber");
 input.addEventListener("keyup", function(event) {
@@ -169,7 +169,7 @@ function initializeUI(game) {
 }
 
 /*
- *calculate the weights of the steam games
+ * Calculate the weights of the steam games
 */
 function calculateWeights(game, rec_list){
   var rec_ids = [];
@@ -227,21 +227,15 @@ function populateGraph(input, rec_list, distances) {
   var max_distance = Math.max(...distance_list);
   var min_distance = Math.min(...distance_list);
 
-  console.log(max_distance);
-  console.log(min_distance);
-
-  var weightScake = d3.scaleLinear()
+  var weightScale = d3.scaleLinear()
                     .domain([min_distance, max_distance])
-                    .range([20, 60]);
+                    .range([50, 25]);
 
   var links = [];
   for (game of rec_list) {
     if (game == null) continue;
-    links.push({"source": input.name, "target": game.name, "weight": weightScake(distances[game.steam_id])});
+    links.push({"source": input.name, "target": game.name, "weight": weightScale(distances[game.steam_id])});
   }
-
-
-  console.log(links)
 
   var nodes = {};
 
@@ -255,7 +249,7 @@ function populateGraph(input, rec_list, distances) {
 
   var force = d3.forceSimulation()
     .nodes(d3.values(nodes))
-    .force("link", d3.forceLink(links).distance(100))
+    .force("link", d3.forceLink(links).distance(115))
     .force('center', d3.forceCenter(width / 2, height / 2))
     .force("x", d3.forceX())
     .force("y", d3.forceY())
@@ -385,5 +379,202 @@ function populateGraph(input, rec_list, distances) {
   }
 
   function addLike(game) {
-    liked_games.push(game['steam_id']);
+    if (liked_games.includes(game['steam_id'])) {
+      ;
+    } else {
+      liked_games.push(game['steam_id']);
+    }
+  }
+
+  function resetLikes() {
+    liked_games = [];
+  }
+
+  function reprocessGraph() {
+    svg.selectAll("*").remove();
+    getRecommendations(liked_games, 5, 2)
+      .then(ids => Promise.all(ids.map(getGameBySteamID)))
+      .then(rec_games => processLikedGames(liked_games, rec_games));
+  }
+
+  function processLikedGames(ids, games) {
+    Promise.all(ids.map(getGameBySteamID))
+      .then(res => calculateConnections(res, games));
+  }
+
+  function calculateConnections(gamesL, gamesR) {
+    var rec_ids = [];
+
+    for (game of gamesR){
+      if (game == null) continue;
+      rec_ids.push(game.steam_id);
+    }
+
+    Promise.all(liked_games.map(liked_games => getDistances(liked_games, rec_ids, 2)))
+      .then(distances => repopulateGraph(gamesL, gamesR, distances));
+  }
+
+  function repopulateGraph(gamesL, gamesR, distances) {
+    processGame(gamesL[0]);
+
+    // Create list of liked_games names
+    var liked_names = gamesL.map(game => game.name);
+
+    // Calculate weights for each recommended game
+    var weights = {};
+    for (game of gamesR) {
+      if (game == null) continue;
+      var total = 0;
+      for (distance_dict of distances) {
+        total += distance_dict[game.steam_id];
+      }
+      weights[game.steam_id] = total;
+    }
+
+    var distance_list = Object.values(weights);
+    var max_weight = Math.max(...distance_list);
+    var min_weight = Math.min(...distance_list);
+
+    var weightScale = d3.scaleLinear()
+                      .domain([min_weight, max_weight])
+                      .range([50, 25]);
+
+    var links = [];
+
+    for (gameL of gamesL) {
+      for (gameR of gamesR) {
+        if (gameR == null) continue;
+        links.push({"source": gameL.name, "target": gameR.name, "weight": weightScale(weights[gameR.steam_id])});
+      }
+    }
+
+    var nodes = {};
+
+    // Compute the distinct nodes from the links
+    links.forEach(function(link) {
+      link.source = nodes[link.source] ||
+        (nodes[link.source] = {name: link.source, weight: 35});
+      link.target = nodes[link.target] ||
+        (nodes[link.target] = {name: link.target, weight: link.weight});
+    });
+
+    var force = d3.forceSimulation()
+      .nodes(d3.values(nodes))
+      .force("link", d3.forceLink(links).distance(260))
+      .force('center', d3.forceCenter(width / 2, height / 2))
+      .force("x", d3.forceX())
+      .force("y", d3.forceY())
+      .force("charge", d3.forceManyBody().strength(-955))
+      .alphaTarget(1)
+      .on("tick", tick);
+
+    // add the links and the arrows
+    var path = svg.append("g")
+      .selectAll("path")
+      .data(links)
+      .enter()
+      .append("path")
+      .attr("class", function(d) { return "link " + d.type; });
+
+    // define the nodes
+    var node = svg.selectAll(".node")
+      .data(force.nodes())
+      .enter().append("g")
+      .attr("class", "node")
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended)
+        );
+
+    // add the nodes
+    node.append("circle")
+      .attr("r", function(d) {
+        return d.weight;
+      })
+      .attr("class", function(d) {
+        if (liked_names.includes(d.name)) {
+          return "source";
+        } else {
+          return "target";
+        }
+      });
+
+    // Pin/Unpin nodes on double click
+    node.on("dblclick", function(d) {
+        if (d.fixed == true) {
+            d.fixed = false;
+            d.fx = null;
+            d.fy = null;
+        } else {
+          d.fixed = true;
+          d.fx = d.x;
+          d.fy = d.y;
+        }
+    });
+
+    // Show game information on click
+    node.on("click", function(d) {
+      getGameByName(d.name).then(processGame);
+    });
+
+    // label the nodes
+    var label = svg.selectAll("text")
+      .data(force.nodes())
+      .enter()
+      .append("text")
+      .text(function(d) {
+        return d.name;
+      })
+      .call(d3.drag()
+        .on("start", dragstarted)
+        .on("drag", dragged)
+        .on("end", dragended)
+    );
+
+    // add the curvy lines
+    function tick() {
+      path.attr("d", function(d) {
+          var dx = d.target.x - d.source.x,
+              dy = d.target.y - d.source.y,
+              dr = Math.sqrt(dx * dx + dy * dy);
+          return "M" +
+              d.source.x + "," +
+              d.source.y + "A" +
+              dr + "," + dr + " 0 0,1 " +
+              d.target.x + "," +
+              d.target.y;
+    });
+
+    node
+        .attr("transform", function(d) {
+        return "translate(" + d.x + "," + d.y + ")"; })
+    label
+        .attr("transform", function(d) {
+        return "translate(" + d.x + "," + (d.y + d.weight + 5) + ")"; })
+  };
+
+  function dragstarted(d) {
+    if (!d3.event.active) force.alphaTarget(0.3).restart();
+    d.fx = d.x;
+    d.fy = d.y;
+  };
+
+  function dragged(d) {
+    d.fx = d3.event.x;
+    d.fy = d3.event.y;
+  };
+
+  function dragended(d) {
+    if (!d3.event.active) force.alphaTarget(0);
+    if (d.fixed == true){
+      d.fx = d.x;
+      d.fy = d.y;
+    }
+    else{
+      d.fx = null;
+      d.fy = null;
+    }
+
+  };
   }

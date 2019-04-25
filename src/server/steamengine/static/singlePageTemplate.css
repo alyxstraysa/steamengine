@@ -161,8 +161,20 @@ label {
 	margin-right: 15px;
 }
 
-form{
+.form_container {
 	padding-bottom: 5px;
+}
+
+.form_container form, .form_container input {
+	display: inline;
+}
+
+#recalculate_reset {
+	float: right;
+}
+
+#recalculate_reset input {
+	margin-left: 15px;
 }
 
 /* Small Desktops */
